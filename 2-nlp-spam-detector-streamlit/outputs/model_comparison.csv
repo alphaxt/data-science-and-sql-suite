@@ -1,0 +1,6 @@
+Model Name,Accuracy,Precision,Recall,F1-Score
+Multinomial Naive Bayes,0.9709,1.0,0.7841,0.879
+Logistic Regression,0.9564,0.9796,0.6906,0.8101
+Support Vector Machine (SVC),0.9728,0.9741,0.8201,0.8906
+Random Forest Classifier,0.968,1.0,0.7626,0.8653
+Decision Tree Classifier,0.9244,0.8166,0.6978,0.7524

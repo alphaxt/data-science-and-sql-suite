@@ -1,0 +1,16 @@
+# Core application
+flask>=3.0,<3.2
+flask-limiter>=3.5,<4.0
+ibm-watson>=7.0,<8.0
+python-dotenv>=1.0,<2.0
+
+# Production WSGI server (cross-platform, works on Windows)
+waitress>=3.0,<4.0
+
+# Testing
+pytest>=7.4
+pytest-cov>=4.1
+
+# Static analysis
+pylint>=3.0
+flake8>=6.1

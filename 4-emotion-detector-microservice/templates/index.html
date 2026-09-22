@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+          content="Detect emotions in text using IBM Watson NLU.">
+    <title>Emotion Detection</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <a class="skip-link" href="#analyze">Skip to analyzer</a>
+
+    <header class="site-header">
+        <div class="brand">
+            <span class="brand-mark" aria-hidden="true">🎭</span>
+            <span class="brand-name">Emotion<strong>Detect</strong></span>
+        </div>
+        <button id="theme-toggle" class="theme-toggle" type="button"
+                aria-label="Toggle color theme" title="Toggle theme">
+            <span aria-hidden="true">🌙</span>
+        </button>
+    </header>
+
+    <main class="page">
+        <section class="hero">
+            <h1>Understand the emotion behind any text</h1>
+            <p class="hero-sub">
+                Paste a message, review, or comment and instantly see the
+                emotional breakdown across five core emotions.
+            </p>
+        </section>
+
+        <section id="analyze" class="card analyzer" aria-labelledby="analyze-h">
+            <h2 id="analyze-h" class="visually-hidden">Analyze text</h2>
+            <form method="POST" action="/" id="emotion-form">
+                <div class="form-group">
+                    <label for="text">Enter text to analyze</label>
+                    <textarea
+                        id="text"
+                        name="text"
+                        maxlength="1000"
+                        placeholder="e.g. I'm absolutely thrilled with how this turned out!"
+                        aria-describedby="char-count"
+                        required>{{ request.form.get('text', '') }}</textarea>
+                    <div class="field-meta">
+                        <span id="char-count" class="char-count">0 / 1000</span>
+                    </div>
+                </div>
+
+                <div class="samples" aria-label="Example texts">
+                    <span class="samples-label">Try:</span>
+                    <button type="button" class="chip" data-sample="I am so happy and excited about today!">Joyful</button>
+                    <button type="button" class="chip" data-sample="I am really mad and frustrated about this!">Angry</button>
+                    <button type="button" class="chip" data-sample="I feel so sad and lonely right now.">Sad</button>
+                    <button type="button" class="chip" data-sample="I am scared and worried about what happens next.">Fearful</button>
+                </div>
+
+                <button type="submit" id="submit-btn" class="btn-primary">
+                    <span class="btn-label">Detect Emotion</span>
+                    <span class="spinner" aria-hidden="true"></span>
+                </button>
+            </form>
+        </section>
+
+        {% if result %}
+        <section class="card result" aria-live="polite" tabindex="-1" id="result">
+            <h2>Analysis Results</h2>
+            {% if result.error %}
+                <div class="alert error" role="alert">
+                    <span class="alert-icon" aria-hidden="true">⚠️</span>
+                    <span>{{ result.error }}</span>
+                </div>
+            {% else %}
+                {% set emotions = [
+                    ('Anger', result.anger, 'anger', '😠'),
+                    ('Disgust', result.disgust, 'disgust', '🤢'),
+                    ('Fear', result.fear, 'fear', '😨'),
+                    ('Joy', result.joy, 'joy', '😄'),
+                    ('Sadness', result.sadness, 'sadness', '😢')
+                ] %}
+
+                <div class="dominant-card dominant-{{ result.dominant_emotion }}">
+                    <span class="dominant-emoji" aria-hidden="true">
+                        {%- if result.dominant_emotion == 'joy' -%}😄
+                        {%- elif result.dominant_emotion == 'anger' -%}😠
+                        {%- elif result.dominant_emotion == 'sadness' -%}😢
+                        {%- elif result.dominant_emotion == 'fear' -%}😨
+                        {%- elif result.dominant_emotion == 'disgust' -%}🤢
+                        {%- else -%}🙂{%- endif -%}
+                    </span>
+                    <div>
+                        <span class="dominant-caption">Dominant emotion</span>
+                        <span class="dominant-name">{{ result.dominant_emotion | capitalize }}</span>
+                    </div>
+                </div>
+
+                <ul class="emotion-list">
+                    {% for label, score, key, emoji in emotions %}
+                    <li class="emotion-item{% if key == result.dominant_emotion %} is-dominant{% endif %}">
+                        <div class="emotion-row">
+                            <span class="emotion-label">
+                                <span class="emotion-emoji" aria-hidden="true">{{ emoji }}</span>
+                                {{ label }}
+                            </span>
+                            <span class="emotion-score">{{ score }}%</span>
+                        </div>
+                        <div class="bar-track">
+                            <div class="bar-fill bar-{{ key }}"
+                                 role="progressbar"
+                                 aria-valuenow="{{ score }}"
+                                 aria-valuemin="0"
+                                 aria-valuemax="100"
+                                 aria-label="{{ label }} score {{ score }} percent"
+                                 style="width: {{ score }}%;"></div>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </section>
+        {% endif %}
+    </main>
+
+    <footer class="site-footer">
+        <p>Powered by IBM Watson NLU · Falls back to a keyword model when
+           no API key is set.</p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='app.js') }}" defer></script>
+</body>
+</html>

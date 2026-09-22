@@ -1,0 +1,10 @@
+Iris Flower Classification Results
+
+Model 1: Logistic Regression
+Accuracy: 1.00
+
+Model 2: K-Nearest Neighbors
+Accuracy: 1.00
+
+Conclusion:
+Both models achieved 100% accuracy on the test dataset.

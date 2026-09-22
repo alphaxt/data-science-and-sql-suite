@@ -1,0 +1,33 @@
+# Version control
+.git
+.gitignore
+
+# Python caches / build artifacts
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.eggs/
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# Test / coverage artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local environment / secrets
+.env
+
+# Editor / OS files
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# CI (not needed in image)
+.github/

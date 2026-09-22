@@ -1,0 +1,24 @@
+# Render Blueprint for the Emotion Detection app.
+# Docs: https://render.com/docs/blueprint-spec
+#
+# To deploy: on render.com choose "New +" > "Blueprint", connect this
+# repo, and Render reads this file automatically.
+
+services:
+  - type: web
+    name: emotion-detection
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      # The app runs with the keyword-based mock unless these are set.
+      # Add real values in the Render dashboard (marked sync:false so
+      # they are never committed to the repo).
+      - key: WATSON_NLU_APIKEY
+        sync: false
+      - key: WATSON_NLU_URL
+        sync: false
+      - key: FLASK_DEBUG
+        value: "false"

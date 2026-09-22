@@ -1,0 +1,12 @@
+=== FINAL MODEL EVALUATION BREAKDOWN ===
+Selected Deployment Model: Multinomial Naive Bayes
+───────────────────────────────────────────────────
+
+                      precision    recall  f1-score   support
+
+0 (Ham / Legitimate)     0.9676    1.0000    0.9836       867
+1 (Spam / Malicious)     1.0000    0.7820    0.8776       133
+
+            accuracy                         0.9710      1000
+           macro avg     0.9838    0.8910    0.9306      1000
+        weighted avg     0.9719    0.9710    0.9695      1000
