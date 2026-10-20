@@ -4,17 +4,9 @@ import nltk
 from nltk.corpus import stopwords
 import string
 from nltk.stem.porter import PorterStemmer
-
 import os
 
-# force download
-nltk.download('punkt')
-nltk.download('punkt_tab')
-nltk.download('stopwords')
-
-
-
-# 1. Set page configuration (Must be the very first Streamlit command)
+# Set page configuration before any other Streamlit calls.
 st.set_page_config(
     page_title="Email/SMS Spam Detector",
     page_icon="🛡️",
@@ -22,7 +14,31 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 2. Custom CSS for modern styling (Fixed parameter to unsafe_allow_html)
+# Download only resources that are not already provided by Streamlit's nltk.txt.
+@st.cache_resource
+def load_nltk_resources():
+    resources = {
+        "tokenizers/punkt": "punkt",
+        "tokenizers/punkt_tab": "punkt_tab",
+        "corpora/stopwords": "stopwords",
+    }
+    for resource_path, package_name in resources.items():
+        try:
+            nltk.data.find(resource_path)
+        except LookupError:
+            if not nltk.download(package_name, quiet=True):
+                raise RuntimeError(
+                    f"NLTK resource '{package_name}' is unavailable. "
+                    "Add it to app/nltk.txt or allow the app to download it."
+                )
+            nltk.data.find(resource_path)
+
+    return set(stopwords.words("english"))
+
+
+ENGLISH_STOPWORDS = load_nltk_resources()
+
+# Custom CSS for modern styling.
 st.markdown("""
     <style>
     /* Main app background and typography */
@@ -82,7 +98,7 @@ st.markdown("""
 
 ps = PorterStemmer()
 
-# 3. Preprocessing functions
+# Preprocessing functions
 def transform_lower_case(text):
     text = text.lower()
     text = nltk.word_tokenize(text)
@@ -96,7 +112,7 @@ def transform_lower_case(text):
     y.clear()
     
     for i in text:
-        if i not in stopwords.words('english') and i not in string.punctuation:
+        if i not in ENGLISH_STOPWORDS and i not in string.punctuation:
             y.append(i)
 
     text = y[:]
@@ -107,7 +123,7 @@ def transform_lower_case(text):
         
     return " ".join(y)
 
-# 4. Load the model and vectorizer with resource caching (Cloud-Safe Update)
+# Load the model and vectorizer with resource caching.
 @st.cache_resource
 def load_models():
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -119,15 +135,24 @@ def load_models():
         vectorizer_path = os.path.join(CLOUD_DIR, 'vectorizer.pkl')
         model_path = os.path.join(CLOUD_DIR, 'model.pkl')
     
-    # Load the verified file paths
-    tfidf = pickle.load(open(vectorizer_path, 'rb'))
-    model = pickle.load(open(model_path, 'rb'))
+    if not os.path.exists(vectorizer_path) or not os.path.exists(model_path):
+        raise FileNotFoundError(
+            "Model files ('vectorizer.pkl' and 'model.pkl') must be present "
+            "next to app.py."
+        )
+
+    with open(vectorizer_path, "rb") as vectorizer_file:
+        tfidf = pickle.load(vectorizer_file)
+    with open(model_path, "rb") as model_file:
+        model = pickle.load(model_file)
     return tfidf, model
+
 
 try:
     tfidf, model = load_models()
-except FileNotFoundError:
-    st.error("Model files ('vectorizer.pkl' or 'model.pkl') not found. Please ensure they are in the same folder as app.py.")
+except (FileNotFoundError, ImportError, OSError, pickle.UnpicklingError, ValueError) as error:
+    st.error(f"Unable to load the spam detector model: {error}")
+    st.stop()
 
 # --- UI Header Section ---
 st.markdown("<h1>🛡️ AI Intelligent Spam Guard</h1>", unsafe_allow_html=True)

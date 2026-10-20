@@ -71,7 +71,7 @@ This project focuses on building an intelligent system to classify messages as e
 ## 6. How to Run
 
 ```bash
-cd DataScience-Task4-EmailSpamDetection
+cd 2-nlp-spam-detector-streamlit
 pip install -r app/requirements.txt
 streamlit run app/app.py
 ```
